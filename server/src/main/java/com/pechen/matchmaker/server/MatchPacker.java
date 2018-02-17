@@ -3,7 +3,6 @@ package com.pechen.matchmaker.server;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Optional;
 import java.util.concurrent.*;
 
 /**
@@ -37,26 +36,7 @@ public class MatchPacker {
     };
 
     public void packUserIntoMatch(User user){
-        for (int i = 0; i < matchMap.keySet().size(); i++){
-            ArrayList<Long> userIds = matchMap.get(i);
-            boolean isUserSuitable = true;
-            for (Long userId : userIds){
-                Optional<User> matchingUser = usersSet.stream().
-                        filter(p -> p.getId().equals(userId)).
-                        findFirst();
-                User userInTeam = matchingUser.get();
 
-                if (Math.abs(user.getRank() - userInTeam.getRank()) > appropriateWaiting(user.getRegistrationTime(), userInTeam.getRegistrationTime())){
-                    isUserSuitable = false;
-                    break;
-                }
-
-            }
-
-            if (isUserSuitable){
-                userIds.add(user.getId());
-            }
-        }
     }
 
     private double appropriateWaiting(long user1RegistrationTime, long user2RegistrationTime){

@@ -31,7 +31,7 @@ public class MatchRegisterREST {
 
         long registrationtime = new Date().getTime();
         logger.info("try register user: " + id + ":" + rank + " " + registrationtime);
-        usersSet.add(new User(Long.parseLong(id), Integer.parseInt(rank), registrationtime));
+        usersSet.add(new User(Long.parseLong(id), Integer.parseInt(rank), registrationtime, 0L, false));
 
         return Response.status(200).build();
     }

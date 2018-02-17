@@ -4,22 +4,26 @@ package com.pechen.matchmaker.server;
  * Created by pechen on 15.02.2018.
  */
 public class User {
-    Long id;
+    Long userId;
     Integer rank;
     Long registrationTime;
+    Long teamId;
+    boolean isMatchCompleted;
 
-    public User(Long id, Integer rank, Long registrationTime) {
-        this.id = id;
+    public User(Long userId, Integer rank, Long registrationTime, Long teamId, boolean isMatchCompleted) {
+        this.userId = userId;
         this.rank = rank;
         this.registrationTime = registrationTime;
+        this.teamId = teamId;
+        this.isMatchCompleted = isMatchCompleted;
     }
 
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Integer getRank() {
@@ -36,5 +40,21 @@ public class User {
 
     public void setRegistrationTime(Long registrationTime) {
         this.registrationTime = registrationTime;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public boolean isMatchCompleted() {
+        return isMatchCompleted;
+    }
+
+    public void setMatchCompleted(boolean matchCompleted) {
+        isMatchCompleted = matchCompleted;
     }
 }
