@@ -9,13 +9,13 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ClientSrevice {
 
-    private static String REGISTER_URL = "http://127.0.0.1/match/register/";
+    private static String REGISTER_URL = "http://127.0.0.1:8080/server/match/register/";
     public static AtomicLong userId = new AtomicLong(0);
 
     public static void main(String[] args) {
         ExecutorService service = Executors.newCachedThreadPool();
 
-        for(int i = 0; i < 5; i++) {
+        for(int i = 0; i < 2; i++) {
             service.submit(new Runnable() {
                 public void run() {
                     while (true){
@@ -26,7 +26,8 @@ public class ClientSrevice {
                             e.printStackTrace();
                         }
                         try {
-                            HttpRequestUtil.sendGet(REGISTER_URL + userId.getAndIncrement());
+                            int randomRank = ThreadLocalRandom.current().nextInt(1, 30);
+                            HttpRequestUtil.sendGet(REGISTER_URL + userId.getAndIncrement() + "/" + randomRank);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
