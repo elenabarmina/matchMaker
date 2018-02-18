@@ -1,7 +1,8 @@
 package com.pechen.matchmaker.server;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
@@ -10,16 +11,13 @@ import java.util.concurrent.*;
  * Created by pechen on 17.02.2018.
  */
 public class MatchPackerRegistrationSubscriber implements IEventListener {
-
-    @Inject
-    ConcurrentSkipListSet<UserInMatchQueue> usersSet;
-    @Inject
-    ConcurrentSkipListMap<Long, ArrayList<Long>> matchMap;
+    final static Logger logger = LoggerFactory.getLogger(DataSource.class);
 
     ExecutorService packerService = Executors.newSingleThreadExecutor();
 
     @Override
     public void update(EventType eventType, UserInMatchQueue newUser) {
+        System.out.println("new user registration notification recieved");
         for (Long teamId : DataSource.getInstance().getTeamIdsInProcessing()){
             Team currentTeam = DataSource.getInstance().getTeamById(teamId);
             if (currentTeam == null || currentTeam.getUsersCount() > 8) continue;
@@ -28,6 +26,7 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
 
             if (teamUsersSet.size() > 0) {
                 if (isUserAppropriateToTeam(newUser, teamUsersSet)){
+                    System.out.println("newUserappropriate to team id: " + teamId);
                     if (DataSource.getInstance().addUserIfTeamNotChanged(teamId, currentTeam.getUsersCount(), newUser)) return;
                 }
             }
@@ -36,6 +35,7 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
         Boolean isTeamCreated = DataSource.getInstance().createNewTeamWithSingleUser(newUser);
         if (!isTeamCreated){
             //return exception to user to try again
+            System.out.println("cannot add new user");
         }
     }
 
@@ -55,7 +55,7 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
     };
 
     public void repackSingleUsersIntoTeam(){
-
+        System.out.println("repacking started.");
         for (Long singleTeamId : DataSource.getInstance().getSingleTeamIdsInProcessing()){
             for (Long teamId : DataSource.getInstance().getTeamIdsInProcessing()){
                 if (singleTeamId.equals(teamId)) continue;

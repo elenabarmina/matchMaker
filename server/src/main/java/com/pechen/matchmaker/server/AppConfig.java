@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class AppConfig extends Application {
 
     public AppConfig(){
-
+        new MatchPackerRegistrationSubscriber().start();
     }
 
 }

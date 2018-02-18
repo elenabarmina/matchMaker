@@ -3,6 +3,7 @@ package com.pechen.matchmaker.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -21,14 +22,18 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Path("register")
 public class MatchRegisterREST {
 
-    @Inject
-    EventManager events;
+    public EventManager events;
 
     public MatchRegisterREST(){
         this.events = new EventManager(EventType.REGISTRATION);
     }
 
     final static Logger logger = LoggerFactory.getLogger(MatchRegisterREST.class);
+
+    @PostConstruct
+    public void init(){
+        events.subscribe(EventType.REGISTRATION, new MatchPackerRegistrationSubscriber());
+    }
 
     @GET
     @Path("/{id}/{rank}")

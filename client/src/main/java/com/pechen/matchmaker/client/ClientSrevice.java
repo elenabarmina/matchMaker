@@ -15,20 +15,21 @@ public class ClientSrevice {
     public static void main(String[] args) {
         ExecutorService service = Executors.newCachedThreadPool();
 
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < 1; i++) {
             service.submit(new Runnable() {
                 public void run() {
                     while (true){
+                        try {
+                            int randomRank = ThreadLocalRandom.current().nextInt(1, 30);
+                            System.out.println("tru to send request");
+                            HttpRequestUtil.sendGet(REGISTER_URL + userId.getAndIncrement() + "/" + randomRank);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         long timeout = ThreadLocalRandom.current().nextLong(1, 10);
                         try {
                             TimeUnit.SECONDS.sleep(timeout);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            int randomRank = ThreadLocalRandom.current().nextInt(1, 30);
-                            HttpRequestUtil.sendGet(REGISTER_URL + userId.getAndIncrement() + "/" + randomRank);
-                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
