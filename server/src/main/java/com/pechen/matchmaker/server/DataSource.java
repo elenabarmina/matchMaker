@@ -93,39 +93,24 @@ public class DataSource {
     }
 
     public List<Long> getTeamIdsInProcessing() {
-        Connection connection = getConnection();
-        if (connection == null) return null;
-
-        Statement stmt = null;
-        List<Long> matchIds = new ArrayList<>();
-
-        ResultSet rs = null;
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery("SELECT ID " +
-                                                    "FROM T_TEAM_LIST " +
-                                                    "WHERE T_TEAM_LIST.MATCH_CREATION_TIME = 0 " +
-                                                    "AND T_TEAM_LIST.USERS_COUNT > 0" +
-                                                    "ORDER BY T_TEAM_LIST.USERS_COUNT DESC");
-
-        while(rs.next()) {
-            matchIds.add(rs.getLong("ID"));
-        }
-        } catch (SQLException e) {
-            return new ArrayList<>();
-        }
-
-        try {
-            rs.close();
-            connection.close();
-        } catch (SQLException e) {
-            return new ArrayList<>();
-        }
-
-        return matchIds;
+        return
+                getIdsBySql("SELECT ID " +
+                        "FROM T_TEAM_LIST " +
+                        "WHERE T_TEAM_LIST.MATCH_CREATION_TIME = 0 " +
+                        "AND T_TEAM_LIST.USERS_COUNT > 0" +
+                        "ORDER BY T_TEAM_LIST.USERS_COUNT DESC", "ID");
     }
 
     public List<Long> getSingleTeamIdsInProcessing() {
+        return
+                getIdsBySql("SELECT ID " +
+                        "FROM T_TEAM_LIST " +
+                        "WHERE T_TEAM_LIST.MATCH_CREATION_TIME = 0 " +
+                        "AND T_TEAM_LIST.USERS_COUNT == 1" +
+                        "ORDER BY T_TEAM_LIST.USERS_COUNT ASC", "ID");
+    }
+
+    public List<Long> getIdsBySql(String sql, String resultColumnName) {
         Connection connection = getConnection();
         if (connection == null) return null;
 
@@ -135,14 +120,10 @@ public class DataSource {
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
-            rs = stmt.executeQuery("SELECT ID " +
-                    "FROM T_TEAM_LIST " +
-                    "WHERE T_TEAM_LIST.MATCH_CREATION_TIME = 0 " +
-                    "AND T_TEAM_LIST.USERS_COUNT == 1" +
-                    "ORDER BY T_TEAM_LIST.USERS_COUNT ASC");
+            rs = stmt.executeQuery(sql);
 
             while(rs.next()) {
-                matchIds.add(rs.getLong("ID"));
+                matchIds.add(rs.getLong(resultColumnName));
             }
         } catch (SQLException e) {
             return new ArrayList<>();
