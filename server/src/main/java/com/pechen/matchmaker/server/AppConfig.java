@@ -11,11 +11,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @javax.ws.rs.ApplicationPath("match")
 public class AppConfig extends Application {
 
-    public static Long matchId = 0L;
-
-    public static ConcurrentSkipListSet<User> usersSet = new ConcurrentSkipListSet<>();
-    public static ConcurrentSkipListMap<Long, ArrayList<Long>> matchMap = new ConcurrentSkipListMap<>();
-
     public AppConfig(){
 
     }
