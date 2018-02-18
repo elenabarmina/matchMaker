@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import javax.xml.crypto.Data;
 import java.util.Date;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -21,7 +22,11 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class MatchRegisterREST {
 
     @Inject
-    ConcurrentSkipListSet<User> usersSet;
+    EventManager events;
+
+    public MatchRegisterREST(){
+        this.events = new EventManager(EventType.REGISTRATION);
+    }
 
     final static Logger logger = LoggerFactory.getLogger(MatchRegisterREST.class);
 
@@ -31,7 +36,9 @@ public class MatchRegisterREST {
 
         long registrationtime = new Date().getTime();
         logger.info("try register user: " + id + ":" + rank + " " + registrationtime);
-        usersSet.add(new User(Long.parseLong(id), Integer.parseInt(rank), registrationtime, 0L, false));
+
+        events.notify(EventType.REGISTRATION,
+                new UserInMatchQueue(Long.parseLong(id), Integer.parseInt(rank), registrationtime, 0L, false));
 
         return Response.status(200).build();
     }
