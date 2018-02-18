@@ -1,7 +1,6 @@
 package com.pechen.matchmaker.server;
 
 import javax.inject.Inject;
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,34 +32,36 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-
+                    repackSingleUsersIntoTeam();
                 }
             }
         });
     };
 
-    public void repackSingleUsersIntoTeam(UserInMatchQueue user){
+    public void repackSingleUsersIntoTeam(){
+
         for (Long singleTeamId : DataSource.getInstance().getSingleTeamIdsInProcessing()){
             for (Long teamId : DataSource.getInstance().getTeamIdsInProcessing()){
                 if (singleTeamId.equals(teamId)) continue;
 
-                Team singleTeam = DataSource.getInstance().getTeamById(singleTeamId);
-                if (singleTeam == null || singleTeam.getUsersCount() != 1) break;
+                Team currentSingleTeam = DataSource.getInstance().getTeamById(singleTeamId);
+                if (currentSingleTeam == null || currentSingleTeam.getUsersCount() != 1) break;
 
                 Team currentTeam = DataSource.getInstance().getTeamById(teamId);
                 if (currentTeam == null || currentTeam.getUsersCount() > 8) continue;
 
                 List<UserInMatchQueue> teamUsersSet = DataSource.getInstance().getUsersInMatchQueueByTeamId(teamId);
                 List<UserInMatchQueue> singleUserSet = DataSource.getInstance().getUsersInMatchQueueByTeamId(singleTeamId);
-                if (singleUserSet.size() > 0 && teamUsersSet.size() > 0) {
+
+                if (singleUserSet.size() == 1 && teamUsersSet.size() > 0) {
                     UserInMatchQueue singleUser = singleUserSet.get(0);
                     if (isUserAppropriateToTeam(singleUser, teamUsersSet)){
-                        Boolean isGroupNotChanged = DataSource.getInstance().addUserIfTeamNotChanged(teamId, currentTeam.getUsersCount(), singleUser);
+                        DataSource.getInstance().addUserIfTeamNotChanged(teamId, currentTeam.getUsersCount(), singleUser);
                     }
                 }
             }
         }
+
     }
 
     private boolean isUserAppropriateToTeam(UserInMatchQueue user, List<UserInMatchQueue> teamUsers){
