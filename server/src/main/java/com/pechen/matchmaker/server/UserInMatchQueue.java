@@ -8,14 +8,12 @@ public class UserInMatchQueue {
     private Integer rank;
     private Long registrationTime;
     private Long teamId;
-    private boolean isMatchCompleted;
 
     public UserInMatchQueue(Long userId, Integer rank, Long registrationTime, Long teamId, boolean isMatchCompleted) {
         this.userId = userId;
         this.rank = rank;
         this.registrationTime = registrationTime;
         this.teamId = teamId;
-        this.isMatchCompleted = isMatchCompleted;
     }
 
     public Long getUserId() {
@@ -50,11 +48,4 @@ public class UserInMatchQueue {
         this.teamId = teamId;
     }
 
-    public boolean isMatchCompleted() {
-        return isMatchCompleted;
-    }
-
-    public void setMatchCompleted(boolean matchCompleted) {
-        isMatchCompleted = matchCompleted;
-    }
 }

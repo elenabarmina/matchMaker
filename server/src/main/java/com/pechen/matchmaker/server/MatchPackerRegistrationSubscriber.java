@@ -20,7 +20,23 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
 
     @Override
     public void update(EventType eventType, UserInMatchQueue newUser) {
+        for (Long teamId : DataSource.getInstance().getTeamIdsInProcessing()){
+            Team currentTeam = DataSource.getInstance().getTeamById(teamId);
+            if (currentTeam == null || currentTeam.getUsersCount() > 8) continue;
 
+            List<UserInMatchQueue> teamUsersSet = DataSource.getInstance().getUsersInMatchQueueByTeamId(teamId);
+
+            if (teamUsersSet.size() > 0) {
+                if (isUserAppropriateToTeam(newUser, teamUsersSet)){
+                    if (DataSource.getInstance().addUserIfTeamNotChanged(teamId, currentTeam.getUsersCount(), newUser)) return;
+                }
+            }
+        }
+
+        Boolean isTeamCreated = DataSource.getInstance().createNewTeamWithSingleUser(newUser);
+        if (!isTeamCreated){
+            //return exception to user to try again
+        }
     }
 
     public void start(){

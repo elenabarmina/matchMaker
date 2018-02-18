@@ -188,14 +188,15 @@ public class DataSource {
             }
 
             if (isTeamNotChanged) {
-                sql = "MERGE INTO T_MATCH_QUEUE (USER_ID, TEAM_ID) KEY(USER_ID) VALUES (" + user.getUserId() + "," + teamId + ")";
+                sql = "MERGE INTO T_MATCH_QUEUE (USER_ID, TEAM_ID) KEY(USER_ID) " +
+                        "VALUES (" + user.getUserId() + "," + teamId + ")";
                 stmt.executeQuery(sql);
                 sql = "MERGE INTO T_TEAM_LIST  (ID, USERS_COUNT) KEY(ID) VALUES (" + teamId + "," + oldUsersCount + 1 + ")";
                 stmt.executeQuery(sql);
                 return true;
             }
         }catch(SQLException e){
-            logger.error("addUserIfTeamNotChanged close connection exception: "
+            logger.error("addUserIfTeamNotChanged exception: "
                     + "teamId=" + teamId
                     + "userId=" + user.getUserId()
                     + " " + e.getMessage());
@@ -211,30 +212,46 @@ public class DataSource {
         return false;
     }
 
-    public Long createNewTeam() throws SQLException {
+    public Boolean createNewTeamWithSingleUser(UserInMatchQueue user) {
         Connection connection = getConnection();
         if (connection == null) return null;
 
-        Long newTeamId = 0L;
-
         Statement stmt = null;
-        List<Long> matchIds = new ArrayList<>();
+        ResultSet rs = null;
+        Long newTeamId = null;
 
-        stmt = connection.createStatement();
-        String sql = "INSERT INTO T_TEAM_LIST (USERS_COUNT) VALUES (0)";
-        stmt.executeQuery(sql);
+        try {
+            stmt = connection.createStatement();
+            String sql = "INSERT INTO T_TEAM_LIST (USERS_COUNT) VALUES (0)";
+            stmt.executeQuery(sql);
 
-        sql = "SELECT ID FROM T_TEAM_LIST WHERE USERS_COUNT = 0";
+            sql = "SELECT ID FROM T_TEAM_LIST WHERE USERS_COUNT = 0";
 
-        ResultSet rs = stmt.executeQuery(sql);
+            rs = stmt.executeQuery(sql);
 
-        while(rs.next()) {
-            newTeamId = rs.getLong("ID");
+            while (rs.next()) {
+                newTeamId = rs.getLong("ID");
+            }
+
+            if (newTeamId != null){
+                sql = "INSERT INTO T_MATCH_QUEUE (USER_ID, TEAM_ID, RANK, LAST_REGISTRATION_TIME)" +
+                        "VALUES (" + user.getUserId() + "," + newTeamId + "," + user.getRank() + "," + user.getRegistrationTime() + ")";
+                stmt.executeQuery(sql);
+                sql = "MERGE INTO T_TEAM_LIST  (ID, USERS_COUNT) KEY(ID) VALUES (" + newTeamId + "," + 1 + ")";
+                stmt.executeQuery(sql);
+            }
+        } catch (SQLException e){
+            logger.error("createNewTeam exception: "
+                    + " " + e.getMessage());
         }
 
-        rs.close();
-        connection.close();
+        try {
+            rs.close();
+            connection.close();
+        } catch (SQLException e) {
+            logger.error("addUserIfTeamNotChanged close connection exception: " + e.getMessage());
+        }
 
-        return newTeamId;
+        return newTeamId != null;
     }
 }
