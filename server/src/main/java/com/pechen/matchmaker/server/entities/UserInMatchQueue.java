@@ -1,4 +1,4 @@
-package com.pechen.matchmaker.server;
+package com.pechen.matchmaker.server.entities;
 
 /**
  * Created by pechen on 15.02.2018.

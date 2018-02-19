@@ -1,4 +1,7 @@
-package com.pechen.matchmaker.server;
+package com.pechen.matchmaker.server.database;
+
+import com.pechen.matchmaker.server.entities.Team;
+import com.pechen.matchmaker.server.entities.UserInMatchQueue;
 
 import java.sql.*;
 import java.util.Date;

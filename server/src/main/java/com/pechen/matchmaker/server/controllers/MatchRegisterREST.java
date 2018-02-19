@@ -1,15 +1,17 @@
-package com.pechen.matchmaker.server;
+package com.pechen.matchmaker.server.controllers;
+
+import com.pechen.matchmaker.server.EventManager;
+import com.pechen.matchmaker.server.EventType;
+import com.pechen.matchmaker.server.MatchPackerRegistrationSubscriber;
+import com.pechen.matchmaker.server.entities.UserInMatchQueue;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import javax.xml.crypto.Data;
 import java.util.Date;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 
 /**

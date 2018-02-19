@@ -1,5 +1,9 @@
 package com.pechen.matchmaker.server;
 
+import com.pechen.matchmaker.server.database.DataSource;
+import com.pechen.matchmaker.server.entities.Team;
+import com.pechen.matchmaker.server.entities.UserInMatchQueue;
+
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;

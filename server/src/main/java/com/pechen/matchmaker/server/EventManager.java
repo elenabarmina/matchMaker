@@ -1,5 +1,7 @@
 package com.pechen.matchmaker.server;
 
+import com.pechen.matchmaker.server.entities.UserInMatchQueue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
