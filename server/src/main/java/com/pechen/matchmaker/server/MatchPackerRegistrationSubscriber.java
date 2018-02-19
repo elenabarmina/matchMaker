@@ -1,8 +1,5 @@
 package com.pechen.matchmaker.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
@@ -11,7 +8,6 @@ import java.util.concurrent.*;
  * Created by pechen on 17.02.2018.
  */
 public class MatchPackerRegistrationSubscriber implements IEventListener {
-    final static Logger logger = LoggerFactory.getLogger(DataSource.class);
 
     ExecutorService packerService = Executors.newSingleThreadExecutor();
 

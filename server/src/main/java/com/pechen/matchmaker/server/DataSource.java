@@ -1,8 +1,5 @@
 package com.pechen.matchmaker.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.*;
 import java.util.Date;
 import java.util.ArrayList;
@@ -12,8 +9,6 @@ import java.util.List;
  * Created by pechen on 18.02.2018.
  */
 public class DataSource {
-
-    final static Logger logger = LoggerFactory.getLogger(DataSource.class);
 
     private static final String JDBC_DRIVER = "org.h2.Driver";
     private static final String DB_URL = "jdbc:h2:~/apTest";
