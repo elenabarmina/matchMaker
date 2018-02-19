@@ -35,7 +35,6 @@ public class MatchRegisterREST {
     public Response registerById(@PathParam("id") String id, @PathParam("rank") String rank) {
 
         long registrationtime = new Date().getTime();
-        System.out.println("try register user: " + id + ":" + rank + " " + registrationtime);
 
         events.notify(EventType.REGISTRATION,
                 new UserInMatchQueue(Long.parseLong(id), Integer.parseInt(rank), registrationtime, 0L, false));

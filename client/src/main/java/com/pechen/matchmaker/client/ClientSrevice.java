@@ -15,7 +15,7 @@ public class ClientSrevice {
     public static void main(String[] args) {
         ExecutorService service = Executors.newCachedThreadPool();
 
-        for(int i = 0; i < 1; i++) {
+        for(int i = 0; i < 5; i++) {
             service.submit(new Runnable() {
                 public void run() {
                     while (true){

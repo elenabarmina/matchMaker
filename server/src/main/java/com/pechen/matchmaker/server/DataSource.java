@@ -24,7 +24,6 @@ public class DataSource {
         Connection conn = null;
         try {
             Class.forName(JDBC_DRIVER);
-            System.out.println("Connecting to database");
             conn = DriverManager.getConnection(DB_URL,USER,PASS);
             return conn;
         } catch(SQLException se) {
@@ -36,7 +35,7 @@ public class DataSource {
     }
 
     public List<UserInMatchQueue> getUsersInMatchQueueByTeamId(Long teamId) {
-        System.out.println("getUsersListByStatement");
+
         List<UserInMatchQueue> usersSet = new ArrayList<>();
 
         try (Connection connection = getConnection();) {
@@ -58,10 +57,9 @@ public class DataSource {
                 }
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("getUsersInMatchQueueByTeamId exception: " + e.getMessage());
         }
 
-        System.out.println("users size in team: " + usersSet.size());
         return usersSet;
     }
 
@@ -85,7 +83,6 @@ public class DataSource {
     }
 
     private List<Long> getIdsBySql(String sql, String resultColumnName) {
-        System.out.println("getIdsBySql");
 
         List<Long> matchIds = new ArrayList<>();
 
@@ -101,7 +98,7 @@ public class DataSource {
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("getIdsBySql error: " + e.getMessage());
             return new ArrayList<>();
         }
 
@@ -109,7 +106,6 @@ public class DataSource {
     }
 
     public Team getTeamById(Long id) {
-        System.out.println("getTeamById");
 
         try (Connection connection = getConnection();){
             if (connection == null) return null;
@@ -135,7 +131,6 @@ public class DataSource {
     }
 
     public Boolean createNewTeamWithSingleUser(UserInMatchQueue user) {
-        System.out.println("createNewTeamWithSingleUser");
 
         Long newTeamId = null;
 
@@ -173,7 +168,6 @@ public class DataSource {
                     stmt.setLong(1, newTeamId);
                     stmt.setInt(2, 1);
                     int rows = stmt.executeUpdate();
-                    System.out.println(rows + " where inserted");
                     connection.commit();
                 }
             }
@@ -185,8 +179,7 @@ public class DataSource {
         return newTeamId != null;
     }
 
-    public Boolean addUserIfTeamNotChanged(Long teamId, Integer oldUsersCount, UserInMatchQueue user) {
-        System.out.println("try to add user into team");
+    public Boolean addUserIfTeamNotChanged(Long teamId, Integer oldUsersCount, UserInMatchQueue user, Long oldUserTeamId) {
 
         Integer newUsersCount = 0;
 
@@ -208,7 +201,6 @@ public class DataSource {
             }
 
             if (isTeamNotChanged) {
-                System.out.println("team not changed");
                 try (PreparedStatement stmt = connection
                         .prepareStatement("MERGE INTO T_MATCH_QUEUE (USER_ID, TEAM_ID, RANK, LAST_REGISTRATION_TIME) KEY(USER_ID) VALUES (?,?,?,?)")) {
                     stmt.setLong(1, user.getUserId());
@@ -216,10 +208,9 @@ public class DataSource {
                     stmt.setLong(3, user.getRank());
                     stmt.setLong(4, user.getRegistrationTime());
                     int rows = stmt.executeUpdate();
-                    System.out.println(rows + " where inserted");
                     connection.commit();
                 }
-                System.out.println("user team id changed: " + user.getUserId() + " to " + teamId);
+                System.out.println("user: " + user.getUserId() + " added to team: " + teamId);
 
                 newUsersCount = oldUsersCount + 1;
                 try (PreparedStatement stmt = connection
@@ -227,10 +218,18 @@ public class DataSource {
                     stmt.setLong(1, teamId);
                     stmt.setInt(2, oldUsersCount+1);
                     int rows = stmt.executeUpdate();
-                    System.out.println(rows + " where inserted");
                     connection.commit();
                 }
-                System.out.println("new team members count: " + newUsersCount);
+                System.out.println(teamId + "members count: " + newUsersCount);
+
+                if (oldUserTeamId != null){
+                    try (PreparedStatement stmt = connection
+                            .prepareStatement("DELETE FROM T_TEAM_LIST WHERE ID = ?")) {
+                        stmt.setLong(1, oldUserTeamId);
+                        int rows = stmt.executeUpdate();
+                        connection.commit();
+                    }
+                }
             }
         }catch(SQLException e){
             System.out.println("addUserIfTeamNotChanged exception: "
@@ -239,51 +238,62 @@ public class DataSource {
                     + " " + e.getMessage());
         }
 
-        System.out.println("team " + teamId + "has " + newUsersCount + " members");
         if (newUsersCount == 8){
-            System.out.println("new team COMPLETED!: " + teamId);
             return makeMatch(teamId);
         }
 
         return true;
     }
 
-    public Boolean makeMatch(Long teamId){
-        System.out.println("makeMatch");
+    public Boolean deleteOldTeam(Long teamId) {
 
         try (Connection connection = getConnection();){
             if (connection == null) return null;
 
             try (PreparedStatement stmt = connection
-                    .prepareStatement("MERGE INTO T_TEAM_LIST  (ID, MATCH_CREATION_TIME) KEY(ID) VALUES (?,?)")) {
+                    .prepareStatement("DELETE FROM T_TEAM_LIST WHERE ID = ?")) {
                 stmt.setLong(1, teamId);
-                stmt.setLong(2, (new Date()).getTime());
                 int rows = stmt.executeUpdate();
                 connection.commit();
             }
-            System.out.println("match " + teamId + "completed!");
+        }
+        catch(SQLException e){
+            System.out.println("deleteOldTeam exception: "
+                    + "teamId=" + teamId
+                    + " " + e.getMessage());
+        }
+
+        System.out.println(teamId + " deleted");
+
+        return true;
+    }
+
+    public Boolean makeMatch(Long teamId){
+        try (Connection connection = getConnection();){
+            if (connection == null) return null;
+
+            Long creationTime = (new Date()).getTime();
+            try (PreparedStatement stmt = connection
+                    .prepareStatement("MERGE INTO T_TEAM_LIST  (ID, MATCH_CREATION_TIME) KEY(ID) VALUES (?,?)")) {
+                stmt.setLong(1, teamId);
+                stmt.setLong(2, creationTime);
+                int rows = stmt.executeUpdate();
+                connection.commit();
+            }
+            System.out.println("match id: " + teamId + " completed in " + creationTime);
 
             List<UserInMatchQueue> usersSet = new ArrayList<>();
 
+            System.out.println("users:");
             try (PreparedStatement stmt = connection
                     .prepareStatement("SELECT * FROM T_MATCH_QUEUE WHERE T_MATCH_QUEUE.TEAM_ID = ?")) {
 
                 stmt.setLong(1, teamId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        UserInMatchQueue newUser = new UserInMatchQueue(rs.getLong("USER_ID"),
-                                rs.getInt("RANK"),
-                                rs.getLong("LAST_REGISTRATION_TIME"),
-                                rs.getLong("TEAM_ID"),
-                                rs.getBoolean("IS_COMPLETED"));
-                        usersSet.add(newUser);
+                        System.out.println(rs.getLong("USER_ID"));
                     }
                 }
-            }
-
-            System.out.println("users " + teamId + ":");
-            for (UserInMatchQueue user : usersSet){
-                System.out.println(user.getUserId());
             }
 
             try (PreparedStatement stmt = connection
@@ -292,7 +302,6 @@ public class DataSource {
                 int rows = stmt.executeUpdate();
                 connection.commit();
             }
-            System.out.println("users: " + teamId + "deleted from queue!");
 
             return true;
 
