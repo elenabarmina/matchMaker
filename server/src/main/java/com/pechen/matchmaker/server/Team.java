@@ -8,10 +8,10 @@ public class Team {
     Integer usersCount;
     Boolean isCompleted;
 
-    public Team(Long id, Integer usersCount, Boolean isCompleted) {
+    public Team(Long id, Integer usersCount) {
         this.id = id;
         this.usersCount = usersCount;
-        this.isCompleted = isCompleted;
+        this.isCompleted = false;
     }
 
     public Long getId() {

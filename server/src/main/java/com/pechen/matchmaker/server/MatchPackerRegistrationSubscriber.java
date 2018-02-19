@@ -20,7 +20,7 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
         System.out.println("new user registration notification recieved");
         for (Long teamId : DataSource.getInstance().getTeamIdsInProcessing()){
             Team currentTeam = DataSource.getInstance().getTeamById(teamId);
-            if (currentTeam == null || currentTeam.getUsersCount() > 8) continue;
+            if (currentTeam == null) continue;
 
             List<UserInMatchQueue> teamUsersSet = DataSource.getInstance().getUsersInMatchQueueByTeamId(teamId);
 
@@ -64,7 +64,7 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
                 if (currentSingleTeam == null || currentSingleTeam.getUsersCount() != 1) break;
 
                 Team currentTeam = DataSource.getInstance().getTeamById(teamId);
-                if (currentTeam == null || currentTeam.getUsersCount() > 8) continue;
+                if (currentTeam == null) continue;
 
                 List<UserInMatchQueue> teamUsersSet = DataSource.getInstance().getUsersInMatchQueueByTeamId(teamId);
                 List<UserInMatchQueue> singleUserSet = DataSource.getInstance().getUsersInMatchQueueByTeamId(singleTeamId);
@@ -72,12 +72,13 @@ public class MatchPackerRegistrationSubscriber implements IEventListener {
                 if (singleUserSet.size() == 1 && teamUsersSet.size() > 0) {
                     UserInMatchQueue singleUser = singleUserSet.get(0);
                     if (isUserAppropriateToTeam(singleUser, teamUsersSet)){
+                        System.out.println("user id " + singleUser.getUserId() + " appropriate to team id " + teamId);
                         DataSource.getInstance().addUserIfTeamNotChanged(teamId, currentTeam.getUsersCount(), singleUser);
                     }
                 }
             }
         }
-
+        System.out.println("repacking end.");
     }
 
     private boolean isUserAppropriateToTeam(UserInMatchQueue user, List<UserInMatchQueue> teamUsers){
